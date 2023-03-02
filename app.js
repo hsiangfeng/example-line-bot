@@ -9,7 +9,6 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
@@ -42,14 +41,20 @@ async function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-  const completion = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: event.message.text ,
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        role: 'user',
+        content: event.message.text,
+      }
+    ],
     max_tokens: 500,
   });
 
   // create a echoing text message
-  const echo = { type: 'text', text: completion.data.choices[0].text.trim() };
+  const [choices] = data.choices;
+  const echo = { type: 'text', text: choices.message.content || '抱歉，我沒有話可說了。' };
 
   // use reply API
   return client.replyMessage(event.replyToken, echo);
